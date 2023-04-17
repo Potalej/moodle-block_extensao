@@ -1,4 +1,9 @@
 <?php
+/**
+ * Aqui ficam as queries que interagem com o Apolo. Assim,
+ * toda busca de dados na base do Apolo devera ser uma funcao
+ * estatica da classe Query.
+ */
 
 namespace block_extensao\Service;
 
@@ -8,18 +13,14 @@ require_once('USPDatabase.php');
 
 class Query 
 {
-  public static function coursesFromThispYear(){
-    $year = date('Y');
-    $query = "SELECT codcurceu,nomcurceu,dtainc FROM CURSOCEU WHERE dtainc LIKE '%{$year}%'";
-    return USPDatabase::fetchAll($query);
-  }
-
+  /**
+   * Captura as turmas abertas.
+   * Sao consideradas como turmas abertas somente as turmas com
+   * data de encerramento posterior a data de hoje.
+   * 
+   * @return array
+   */
   public static function turmasAbertas () {
-    /**
-     * Captura as turmas abertas.
-     * Sao consideradas como turmas abertas somente as turmas com
-     * data de encerramento posterior a data de hoje.
-     */
     $hoje = date("Y-m-d");
     $query = "
       SELECT
@@ -39,12 +40,14 @@ class Query
     return USPDatabase::fetchAll($query);
   }
 
+  /**
+   * Captura os ministrantes das turmas abertas.
+   * Sao consideradas como turmas abertas somente as turmas com
+   * data de encerramento posterior a data de hoje.
+   * 
+   * @return array
+   */
   public static function ministrantesTurmasAbertas () {
-    /**
-     * Captura os ministrantes das turmas abertas.
-     * Sao consideradas como turmas abertas somente as turmas com
-     * data de encerramento posterior a data de hoje.
-     */
     $hoje = date("Y-m-d");
     $query = "
       SELECT
@@ -60,13 +63,17 @@ class Query
     return USPDatabase::fetchAll($query);
   }
 
+  /**
+   * A partir do codofeatvceu, captura as informacoes de uma
+   * turma, como a data de inicio e tal.
+   * 
+   * [ a query sera posta aqui posteriormente ]
+   * 
+   * @param string|integer $codofeatvceu Codigo de oferecimento da atividade.
+   * 
+   * @return object
+   */
   public static function informacoesTurma ($codofeatvceu) {
-    /**
-     * A partir do codofeatvceu, captura as informacoes de uma
-     * turma, como a data de inicio e tal.
-     * 
-     * [ a query sera posta aqui posteriormente ]
-     */
     $info_curso = new stdClass;
     $info_curso->codofeatvceu = $codofeatvceu;
     $info_curso->startdate = strtotime("now");
@@ -74,6 +81,13 @@ class Query
     return $info_curso;
   }
   
+  /**
+   * Obtem o objetivo do curso informado.
+   * 
+   * @param string|integer $codofeatvceu Codigo de oferecimento da atividade.
+   * 
+   * @return array
+   */
    // Obtem o objetivo do curso explicitado 
   public static function objetivo_extensao($codofeatvceu) {
     $obj = "
@@ -82,12 +96,16 @@ class Query
     return USPDatabase::fetch($obj);
   }
 
+  /**
+   * Captura os alunos matriculados nas turmas abertas.
+   * Sao consideradas como tumras abertas somente as turmas com
+   * data de encerramento posterior a data de hoje.
+   * 
+   * @param string|integer $codofeatvceu Codigo de oferecimento da atividade.
+   * 
+   * @return array
+   */
   public static function alunosMatriculados ($codofeatvceu) {
-    /**
-     * Captura os alunos matriculados nas turmas abertas.
-     * Sao consideradas como tumras abertas somente as turmas com
-     * data de encerramento posterior a data de hoje.
-     */
     $hoje = date("Y-m-d");
     $query = "
       SELECT 
