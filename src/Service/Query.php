@@ -74,10 +74,20 @@ class Query
    * @return object
    */
   public static function informacoesTurma ($codofeatvceu) {
+    // faz a busca no Apolo
+    $query = "
+      SELECT
+        dtainiofeatv,
+        dtafimofeatv
+      FROM OFERECIMENTOATIVIDADECEU
+      WHERE codofeatvceu = $codofeatvceu
+    ";
+    $info = USPDatabase::fetch($query);
+
     $info_curso = new stdClass;
     $info_curso->codofeatvceu = $codofeatvceu;
-    $info_curso->startdate = strtotime("now");
-    $info_curso->enddate = strtotime("+1 year");
+    $info_curso->startdate = $info['dtainiofeatv'];
+    $info_curso->enddate = $info['dtafimofeatv'];
     return $info_curso;
   }
   
