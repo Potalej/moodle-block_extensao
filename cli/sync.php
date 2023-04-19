@@ -25,7 +25,8 @@ define('CLI_SCRIPT', true);
 
 require(__DIR__.'/../../../config.php');
 require_once($CFG->libdir . '/clilib.php');
-use block_extensao\Service\Sincronizacao;
+require_once(__DIR__ . '/../src/Service/Sincronizacao.php');
+
 
 // Descricao do uso
 $uso = "Para sincronizar os dados do Moodle Extensao com os do Apolo.

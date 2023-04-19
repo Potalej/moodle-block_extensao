@@ -111,7 +111,8 @@ class Query
       SELECT 
         ma.codofeatvceu,
         mc.codpes,
-        p.nompes
+        p.nompes,
+        p.numcpf
       FROM dbo.MATRICULAATIVIDADECEU ma
       INNER JOIN	
         dbo.MATRICULACURSOCEU mc

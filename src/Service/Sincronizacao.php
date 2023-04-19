@@ -8,11 +8,8 @@
  * - cli/sync.php
  */
 
-require(__DIR__.'/../../../../config.php');   
-require_once($CFG->libdir . '/clilib.php');
 require_once('Query.php');
-
-use Query;
+use block_extensao\Service\Query;
 
 class Sincronizar {
 
@@ -86,9 +83,11 @@ class Sincronizar {
   private function sincronizarMinistrantes () {
     // captura os ministrantes
     $ministrantes = Query::ministrantesTurmasAbertas();
+    cli_writeln('[1] Ministrantes capturados;');
 
     // monta o array que sera adicionado na mdl_extensao_ministrante
     $ministrantes = $this->objetoMinistrantes($ministrantes);
+    cli_writeln('[2] Objetos gerados;');
 
     // salva na mdl_extensao_ministrante
     try {
@@ -108,15 +107,17 @@ class Sincronizar {
   private function sincronizarAlunos ($turmas) {
     // captura os alunos matriculados em cada turma
     $alunos = [];
+    cli_writeln('[1] Capturando alunos...');
     foreach ($turmas as $turma) {
       $aluno = Query::alunosMatriculados($turma->codofeatvceu);
       if (!empty($aluno)) $alunos[] = $aluno;
     }
-    if (empty($alunos)) {
+    if (empty($alunos)) { 
       cli_writeln('Sem alunos para sincronizar...');
     } else {
       // monta o array que sera adicionado na mdl_extensao_aluno
       $alunos = $this->objetoAlunos($alunos);
+      cli_writeln('[2] Objetos gerados');
 
       try {
         // salva na mdl_extensao_aluno
@@ -177,6 +178,7 @@ class Sincronizar {
         $obj = new stdClass;
         $obj->codofeatvceu = $aluno['codofeatvceu'];
         $obj->codpes = $aluno['codpes'];
+        $obj->numcpf = $aluno['numcpf'];
         $obj->email = "";
         $obj->nome = $aluno['nompes'];
         return $obj;
