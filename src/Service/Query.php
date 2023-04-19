@@ -67,8 +67,6 @@ class Query
    * A partir do codofeatvceu, captura as informacoes de uma
    * turma, como a data de inicio e tal.
    * 
-   * [ a query sera posta aqui posteriormente ]
-   * 
    * @param string|integer $codofeatvceu Codigo de oferecimento da atividade.
    * 
    * @return object
