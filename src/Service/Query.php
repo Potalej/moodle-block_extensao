@@ -86,8 +86,8 @@ class Query
 
     $info_curso = new stdClass;
     $info_curso->codofeatvceu = $codofeatvceu;
-    $info_curso->startdate = $info['dtainiofeatv'];
-    $info_curso->enddate = $info['dtafimofeatv'];
+    $info_curso->startdate = strtotime($info['dtainiofeatv']);
+    $info_curso->enddate = strtotime($info['dtafimofeatv']);
     return $info_curso;
   }
   
