@@ -64,6 +64,11 @@ if ($opcoes['help']) {
   exit(2);
 }
 
+cli_writeln("
+/*********************************/
+/    SINCRONIZACAO COM O APOLO    /
+/*********************************/");
+
 // faz a sincronizacao
 $sinc = new Sincronizar();
 $apagar = $opcoes['apagar'];
@@ -72,4 +77,8 @@ $pular_alunos = $opcoes['pular_alunos'];
 
 $sinc->sincronizar($opcoes);
 
-cli_writeln('Sincronização encerrada.'); 
+cli_writeln("
+/*********************************/
+/     SINCRONIZACAO CONCLUIDA     /
+/*********************************/
+");

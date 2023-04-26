@@ -105,31 +105,47 @@ class Query
   }
 
   /**
-   * Captura os alunos matriculados nas turmas abertas.
-   * Sao consideradas como tumras abertas somente as turmas com
-   * data de encerramento posterior a data de hoje.
+   * Captura os alunos matriculados em uma determinada turma a
+   * partir de seu codofeatvceu. Retorna uma lista de objetos
+   * na forma:
+   * - codofeatvceu;
+   * - codpes;
+   * - nompes;
+   * - codema.
    * 
    * @param string|integer $codofeatvceu Codigo de oferecimento da atividade.
    * 
    * @return array
    */
   public static function alunosMatriculados ($codofeatvceu) {
-    $hoje = date("Y-m-d");
     $query = "
       SELECT 
         ma.codofeatvceu,
-        mc.codpes,
-        p.nompes,
-        p.numcpf
+        mc.codpes
       FROM dbo.MATRICULAATIVIDADECEU ma
-      INNER JOIN	
+      INNER JOIN
         dbo.MATRICULACURSOCEU mc
         ON mc.codmtrcurceu = ma.codmtrcurceu
-      INNER JOIN
-        dbo.PESSOA p 
-        ON mc.codpes = p.codpes
-      WHERE ma.codofeatvceu = $codofeatvceu
+      WHERE
+        ma.codofeatvceu = $codofeatvceu
     ";
     return USPDatabase::fetchAll($query);
+  }
+
+  public static function infoAlunosMatriculados ($codpes) {
+    $query = "
+      SELECT
+        p.codpes,
+        p.nompes,
+        p.numcpf,
+        em.codema
+      FROM dbo.PESSOA p
+      INNER JOIN
+        dbo.EMAILPESSOA em
+        ON em.codpes = p.codpes
+      WHERE
+        p.codpes = $codpes
+    ";
+    return USPDatabase::fetch($query);   
   }
 }

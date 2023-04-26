@@ -52,6 +52,8 @@ class Sincronizar {
    * @return array|bool
    */
   private function sincronizarTurmas () {
+    cli_writeln(PHP_EOL . '[TURMAS]' . PHP_EOL . '# Capturando turmas...');
+
     // captura as turmas
     $turmas = Query::turmasAbertas();
 
@@ -63,14 +65,16 @@ class Sincronizar {
 
     // se estiver vazio nao tem por que continuar
     if (empty($infos_turma)) {
-      cli_writeln('A base já estava sincronizada!');
+      cli_writeln('(X) A base já estava sincronizada!');
       return false;
     }
 
     try {
+      cli_writeln('* Foram encontradas ' . count($infos_turma) . ' turmas!');
       // salva na mdl_extensao_turma
+      cli_writeln('# Salvando turmas...');
       $this->salvarTurmasExtensao($infos_turma);
-      cli_writeln('Turmas sincronizadas...');
+      cli_writeln('* Turmas sincronizadas!');
       return $infos_turma;
     } catch (Exception $e) {
       $this->mensagemErro('ERRO AO SINCRONIZAR AS TURMAS:', $e, true);
@@ -81,18 +85,20 @@ class Sincronizar {
    * Sincronizacao dos ministrantes
    */
   private function sincronizarMinistrantes () {
+    cli_writeln(PHP_EOL . '[MINISTRANTES]' . PHP_EOL . '# Capturando ministrantes...');
     // captura os ministrantes
     $ministrantes = Query::ministrantesTurmasAbertas();
-    cli_writeln('[1] Ministrantes capturados;');
+    cli_writeln('* Foram encontrados ' . count($ministrantes) . ' ministrantes!');
 
     // monta o array que sera adicionado na mdl_extensao_ministrante
+    cli_writeln('# Criando objetos...');
     $ministrantes = $this->objetoMinistrantes($ministrantes);
-    cli_writeln('[2] Objetos gerados;');
-
+    
     // salva na mdl_extensao_ministrante
     try {
+      cli_writeln('# Salvando ministrantes...');
       $this->salvarMinistrantesTurmas($ministrantes);
-      cli_writeln('Ministrantes sincronizados...');
+      cli_writeln('* Ministrantes sincronizados!');
       return true;
     } catch (Exception $e) {
       $this->mensagemErro('ERRO AO SINCRONIZAR OS MINISTRANTES:', $e, true);
@@ -107,27 +113,59 @@ class Sincronizar {
   private function sincronizarAlunos ($turmas) {
     // captura os alunos matriculados em cada turma
     $alunos = [];
-    cli_writeln('[1] Capturando alunos...');
+    $qntdAlunos = 0;
+    $t0 = time();
+    cli_writeln(PHP_EOL . '[ALUNOS]' . PHP_EOL . '# Capturando alunos...');
+
     foreach ($turmas as $turma) {
       $aluno = Query::alunosMatriculados($turma->codofeatvceu);
-      if (!empty($aluno)) $alunos[] = $aluno;
+      if (!empty($aluno)) { 
+        $alunos[] = $aluno;
+        $qntdAlunos += count($aluno);
+      }
     }
     if (empty($alunos)) { 
       cli_writeln('Sem alunos para sincronizar...');
     } else {
-      // monta o array que sera adicionado na mdl_extensao_aluno
-      $alunos = $this->objetoAlunos($alunos);
-      cli_writeln('[2] Objetos gerados');
+      // calculos
+      $qntdTurmas = count($turmas);
+      $qntdTurmas_comAlunos = count($alunos);
 
+      cli_writeln("* Foram encontrados {$qntdAlunos} alunos!");
+      cli_writeln("* $qntdTurmas_comAlunos / $qntdTurmas das turmas tiveram alguma inscricao encontrada.");
+      
+      // agora captura as informacoes de cada aluno
+      cli_writeln('# Capturando informações dos alunos');
+
+      $lista_alunos = [];
+      foreach ($alunos as $alunos_turma) {
+        $lista = [];
+        foreach ($alunos_turma as $aluno) {
+          $info = Query::infoAlunosMatriculados($aluno['codpes']);
+          $info_aluno = array_merge($aluno, $info);
+          $lista[] = $info_aluno;
+        }
+        $lista_alunos[] = $lista;
+        echo round(count($lista_alunos)/$qntdTurmas_comAlunos*100) . '%...';
+      }
+
+      cli_writeln(PHP_EOL . '# Criando objetos...');
+      // monta o array que sera adicionado na mdl_extensao_aluno
+      $alunos = $this->objetoAlunos($lista_alunos);
+      
       try {
         // salva na mdl_extensao_aluno
+        cli_writeln('# Salvando alunos...');
         foreach ($alunos as $alunos_turma) 
           $this->salvarAlunosTurmas($alunos_turma);
-        cli_writeln('Alunos sincronizados...');
+        cli_writeln('* Alunos sincronizados!');
       } catch (Exception $e) {
         $this->mensagemErro('ERRO AO SINCRONIZAR OS ALUNOS:', $e, true);
       }
+
     }
+    // tempo de processamento
+    cli_writeln('Tempo (alunos): ' . (time() - $t0) . 's');
   }
 
   /**
@@ -179,7 +217,7 @@ class Sincronizar {
         $obj->codofeatvceu = $aluno['codofeatvceu'];
         $obj->codpes = $aluno['codpes'];
         $obj->numcpf = $aluno['numcpf'];
-        $obj->email = "";
+        $obj->email = $aluno['codema'];
         $obj->nome = $aluno['nompes'];
         return $obj;
       }, $alunos_turma);
