@@ -16,9 +16,10 @@ class block_extensao extends block_base {
         $this->content =  new stdClass;
         
         // captura o contexto do usuario
-        $contexto = $this->contexto();
+        $instancia_contexto = $this->contexto();
         
-        if ($contexto == -1 || $contexto == 1) {
+        // caso nao seja um curso (-1) ou seja o painel (1), lista os cursos
+        if ($instancia_contexto == -1 || $instancia_contexto == 1) {
             // lista das turmas nas quais o usuario eh ministrante, se for o caso
             $cursos_usuario = $this->lista_turmas_ministrante();
             
@@ -27,13 +28,23 @@ class block_extensao extends block_base {
                 'inicio' => true,
                 'cursos_docente' => $cursos_usuario 
             );
-        } else {
-            $info = array();
+
+            // template
+            $this->content->text = $OUTPUT->render_from_template('block_extensao/extensao_block', $info);
+        } 
+        // caso contrario, estara dentro de um curso, entao precisa listar os inscritos
+        else {
+            // captura o codofeatvceu
+            $codofeatvceu = Turmas::codofeatvceu($instancia_contexto)->codofeatvceu;
+            // captura os inscritos na turma
+            $inscritos_turma = Turmas::inscritos_turma($codofeatvceu);
+            $info = array(
+                'inscritos' => $inscritos_turma
+            );
+            
+            $this->content->text = $OUTPUT->render_from_template('block_extensao/bloco_curso', $info);
         }
         
-        // template
-        $this->content->text = $OUTPUT->render_from_template('block_extensao/extensao_block', $info);
-
         
         return $this->content;
     }
